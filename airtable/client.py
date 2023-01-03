@@ -7,7 +7,7 @@ from airtable.exceptions import UnauthorizedError, WrongFormatInputError, Contac
 
 
 class Client(object):
-    URL = "https://api.airtable.com/"
+    URL = "https://api.airtable.com/v0/"
     AUTH_URL = "https://airtable.com/oauth2/v1/"
 
     def __init__(self, client_id=None, client_secret=None, redirect_uri=None, code_verifier=None):
@@ -22,6 +22,7 @@ class Client(object):
         self.CLIENT_SECRET = client_secret
         self.REDIRECT_URI = redirect_uri
         self.CODE_VERIFIER = code_verifier
+        self.token = None
         if client_id and client_secret:
             self.CREDENTIALS = base64.b64encode(f"{self.CLIENT_ID}:{self.CLIENT_SECRET}".encode()).decode()
 
@@ -41,7 +42,7 @@ class Client(object):
             "state": state,
             "code_challenge": code_challenge,
             "code_challenge_method": "S256",
-            "scope": "data.records:read data.records:write",
+            "scope": "data.records:read data.records:write schema.bases:read",
         }
         return self.AUTH_URL + auth_endpoint + urlencode(params)
 
@@ -64,6 +65,15 @@ class Client(object):
         }
         return self.post("token", data=body, headers=headers, auth_url=True)
 
+    def get_current_user(self):
+        return self.get("meta/whoami")
+
+    def list_bases(self):
+        return self.get("meta/bases")
+
+    def list_base_tables(self, baseId):
+        return self.get(f"meta/bases/{baseId}/tables")
+
     def set_token(self, token):
         self.token = token
 
@@ -83,6 +93,8 @@ class Client(object):
         _headers = {
             "Accept": "application/json",
         }
+        if self.token:
+            _headers["Authorization"] = "Bearer " + self.token["access_token"]
         if headers:
             _headers.update(headers)
         if "Content-Type" not in _headers:
