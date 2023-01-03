@@ -1,89 +1,100 @@
 import requests
 from urllib.parse import urlencode
+import hashlib
+import base64
 
 from airtable.exceptions import UnauthorizedError, WrongFormatInputError, ContactsLimitExceededError
+
 
 class Client(object):
     URL = "https://api.airtable.com/"
     AUTH_URL = "https://airtable.com/oauth2/v1/"
-    
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-    }
 
-    def __init__(self, access_token=None, client_id=None, client_secret=None, redirect_uri=None):
+    def __init__(self, client_id=None, client_secret=None, redirect_uri=None, code_verifier=None):
+        """
+        client_id: get it from https://airtable.com/create/oauth
+        client_secret: get it from https://airtable.com/create/oauth
+        code_verifier:
+        Must be a cryptographically generated string; 43-128 characters long.
+        Characters belong to the set: a-z / A-Z / 0-9 / “.” / “-” / “\_”.
+        """
         self.CLIENT_ID = client_id
         self.CLIENT_SECRET = client_secret
         self.REDIRECT_URI = redirect_uri
+        self.CODE_VERIFIER = code_verifier
+        if client_id and client_secret:
+            self.CREDENTIALS = base64.b64encode(f"{self.CLIENT_ID}:{self.CLIENT_SECRET}".encode()).decode()
 
-    def authorization_url(self, state, code_challenge):
+    def authorization_url(self, state):
+        code_challenge = (
+            base64.b64encode(hashlib.sha256(self.CODE_VERIFIER.encode()).digest())
+            .decode()
+            .replace("=", "")
+            .replace("+", "-")
+            .replace("/", "_")
+        )
         auth_endpoint = "authorize?"
         params = {
-            'client_id': self.CLIENT_ID,
-            'redirect_uri': self.REDIRECT_URI,
-            'response_type': 'code',
-            'state': state,
-            'code_challenge': code_challenge,
-            'code_challenge_method': 'S256',
-            'scope': 'data.records:read data.records:write'
+            "client_id": self.CLIENT_ID,
+            "redirect_uri": self.REDIRECT_URI,
+            "response_type": "code",
+            "state": state,
+            "code_challenge": code_challenge,
+            "code_challenge_method": "S256",
+            "scope": "data.records:read data.records:write",
         }
         return self.AUTH_URL + auth_endpoint + urlencode(params)
 
-    def token_creation(self, code, code_verifier):
-        headers= {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Authorization": f"Basic {self.CLIENT_ID}:{self.CLIENT_SECRET}"
-        }
+    def token_creation(self, code):
+        headers = {"Content-Type": "application/x-www-form-urlencoded", "Authorization": f"Basic {self.CREDENTIALS}"}
         body = {
             "code": code,
             "redirect_uri": self.REDIRECT_URI,
+            "code_verifier": self.CODE_VERIFIER,
+            "code_challenge_method": "S256",
             "grant_type": "authorization_code",
-            "code_verifier": code_verifier,
-            "code_challenge_method": "S256"
         }
-        return self.post('token', data=body, headers=headers, auth_url=True)
+        return self.post("token", data=body, headers=headers, auth_url=True)
 
     def refresh_token(self, refresh_token):
-        headers= {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Authorization": f"Basic {self.CLIENT_ID}:{self.CLIENT_SECRET}"
-        }
+        headers = {"Content-Type": "application/x-www-form-urlencoded", "Authorization": f"Basic {self.CREDENTIALS}"}
         body = {
-            "grant_type": "authorization_code",
+            "grant_type": "refresh_token",
             "refresh_token": refresh_token,
         }
-        return self.post('token', data=body, headers=headers, auth_url=True)
+        return self.post("token", data=body, headers=headers, auth_url=True)
 
-    def get(self, endpoint, params=None):
-        response = self.request('GET', endpoint, params=params)
+    def set_token(self, token):
+        self.token = token
+
+    def get(self, endpoint, **kwargs):
+        response = self.request("GET", endpoint, **kwargs)
         return self.parse(response)
 
-    def post(self, endpoint, params=None, data=None, headers=None, json=True, auth_url=False):
-        response = self.request('POST', endpoint, params=params, data=data, headers=headers, json=json, auth_url=auth_url)
+    def post(self, endpoint, **kwargs):
+        response = self.request("POST", endpoint, **kwargs)
         return self.parse(response)
 
-    def delete(self, endpoint, params=None):
-        response = self.request('DELETE', endpoint, params=params)
+    def delete(self, endpoint, **kwargs):
+        response = self.request("DELETE", endpoint, **kwargs)
         return self.parse(response)
 
-    def request(self, method, endpoint, params=None, data=None, headers=None, json=True, auth_url=False):
-        _headers = self.headers
+    def request(self, method, endpoint, headers=None, auth_url=False, **kwargs):
+        _headers = {
+            "Accept": "application/json",
+        }
         if headers:
             _headers.update(headers)
-        kwargs = {}
-        if json:
-            kwargs['json'] = data
-        else:
-            kwargs['data'] = data
+        if "Content-Type" not in _headers:
+            _headers["Content-Type"] = "application/json"
         if auth_url:
-            return requests.request(method, self.AUTH_URL + endpoint, params=params, headers=_headers, **kwargs)
+            return requests.request(method, self.AUTH_URL + endpoint, headers=_headers, **kwargs)
         else:
-            return requests.request(method, self.URL + endpoint, params=params, headers=_headers, **kwargs)
+            return requests.request(method, self.URL + endpoint, headers=_headers, **kwargs)
 
     def parse(self, response):
         status_code = response.status_code
-        if 'Content-Type' in response.headers and 'application/json' in response.headers['Content-Type']:
+        if "Content-Type" in response.headers and "application/json" in response.headers["Content-Type"]:
             try:
                 r = response.json()
             except ValueError:
