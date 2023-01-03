@@ -15,7 +15,7 @@ setup(name='airtable-python',
       author='Juan Carlos Rios',
       author_email='juankrios15@gmail.com',
       license='MIT',
-      packages=['calendly'],
+      packages=['airtable'],
       install_requires=[
           'requests',
       ],
