@@ -65,6 +65,9 @@ class Client(object):
         }
         return self.post("token", data=body, headers=headers, auth_url=True)
 
+    def set_token(self, token):
+        self.token = token
+
     def get_current_user(self):
         return self.get("meta/whoami")
 
@@ -74,8 +77,8 @@ class Client(object):
     def list_base_tables(self, baseId):
         return self.get(f"meta/bases/{baseId}/tables")
 
-    def set_token(self, token):
-        self.token = token
+    def list_collaborators(self, baseId):
+        return self.get(f"meta/bases/{baseId}")
 
     def get(self, endpoint, **kwargs):
         response = self.request("GET", endpoint, **kwargs)
