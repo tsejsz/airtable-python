@@ -14,8 +14,8 @@ client = Client(client_id, client_secret, redirect_uri, code_verifier)
 ```
 
 ### Get access_token
-To get the access token using Oauth2 follow the next steps:
-Check https://airtable.com/developers/web/api/oauth-reference for more info.
+To get the access token using Oauth2 follow the next steps.
+Check https://airtable.com/developers/web/api/oauth-reference for more info:
 
 1. Get authorization URL to receive code
 ```
@@ -33,7 +33,8 @@ If your access token expired, you can get a new one using refresh_token:
 ```
 response = client.refresh_access_token(refresh_token)
 ```
-And then set access token again...
+And then set access token again...  
+*Note: If you already have an access token, you can initiate Client without any parameters and directly set token with the access token you have as a dictionary {"access_token": token}*
 
 ### Get current user
 ```
