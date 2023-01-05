@@ -2,6 +2,7 @@ import requests
 from urllib.parse import urlencode
 import hashlib
 import base64
+import json
 
 from airtable.exceptions import UnauthorizedError, WrongFormatInputError, ContactsLimitExceededError
 
@@ -79,6 +80,12 @@ class Client(object):
 
     def list_collaborators(self, baseId):
         return self.get(f"meta/bases/{baseId}")
+
+    def create_records(self, baseId, tableId, records):
+        data = {
+            "records": records
+        }
+        return self.post(f"{baseId}/{tableId}", data=json.dumps(data))
 
     def get(self, endpoint, **kwargs):
         response = self.request("GET", endpoint, **kwargs)

@@ -34,3 +34,33 @@ If your access token expired, you can get a new one using refresh_token:
 response = client.refresh_access_token(refresh_token)
 ```
 And then set access token again...
+
+#### Get current user
+```
+user = client.get_current_user()
+```
+#### List Bases
+```
+bases = client.list_bases()
+```
+#### List Tables
+```
+tables = client.list_base_tables(baseId)
+```
+### Create Record
+```
+records = [
+    {
+        "fields": {
+          "Projects": "Project from python",
+          "Status": "In progress",
+          "Complete?": False
+        }
+    },
+]
+records = client.create_records(baseId, tableId, records)
+```
+#### List Collaborators (needs enterprise scopes access)
+```
+tables = client.list_collaborators(baseId)
+```
