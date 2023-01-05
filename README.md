@@ -35,19 +35,34 @@ response = client.refresh_access_token(refresh_token)
 ```
 And then set access token again...
 
-#### Get current user
+### Get current user
 ```
 user = client.get_current_user()
 ```
-#### List Bases
+### List Bases
 ```
 bases = client.list_bases()
 ```
-#### List Tables
+### List Tables
 ```
 tables = client.list_base_tables(baseId)
 ```
-### Create Record
+### List records
+```
+records = client.list_records(
+    baseId, 
+    tableId, 
+    pageSize=None, 
+    maxRecords=None, 
+    filter_field=None, 
+    filter_value=None, 
+    sort_field=None, 
+    sort_direction=None
+)
+# baseId and tableId are required
+# sort_direction options are 'desc' or 'asc'
+```
+### Create Records
 ```
 records = [
     {
@@ -60,7 +75,7 @@ records = [
 ]
 records = client.create_records(baseId, tableId, records)
 ```
-#### List Collaborators (needs enterprise scopes access)
+### List Collaborators (needs enterprise scopes access)
 ```
-tables = client.list_collaborators(baseId)
+collabs = client.list_collaborators(baseId)
 ```

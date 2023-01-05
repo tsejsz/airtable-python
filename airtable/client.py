@@ -82,10 +82,38 @@ class Client(object):
         return self.get(f"meta/bases/{baseId}")
 
     def create_records(self, baseId, tableId, records):
-        data = {
-            "records": records
-        }
+        """
+        'records' must be a list of dictionaries, each with one key: 'fields'.
+        'fields' key is a dictionary with all fields you want to fill as keys.
+        Field keys are case sensitive. 
+        """
+        data = {"records": records}
         return self.post(f"{baseId}/{tableId}", data=json.dumps(data))
+
+    def list_records(
+        self,
+        baseId,
+        tableId,
+        pageSize=None,
+        maxRecords=None,
+        filter_field=None,
+        filter_value=None,
+        sort_field=None,
+        sort_direction=None,
+    ):
+        """
+        'filter_field' and 'sort_field' are case sensitive.
+        'filter_value' must be exactly as shown in table.
+        'sort_direction' options are 'asc' or 'desc'
+        """
+        params = {"pageSize": pageSize if pageSize else "", "maxRecords": maxRecords if maxRecords else ""}
+        if filter_field and filter_value:
+            params.update({"filterByFormula": "AND({" + f"{filter_field}" + "}" + f"='{filter_value}')"})
+        if sort_field:
+            params.update({"sort[0][field]": sort_field})
+        if sort_direction:
+            params.update({"sort[0][direction]": sort_direction})
+        return self.get(f"{baseId}/{tableId}?{urlencode(params)}")
 
     def get(self, endpoint, **kwargs):
         response = self.request("GET", endpoint, **kwargs)
@@ -115,6 +143,7 @@ class Client(object):
             return requests.request(method, self.URL + endpoint, headers=_headers, **kwargs)
 
     def parse(self, response):
+        print(response.request.url)
         status_code = response.status_code
         if "Content-Type" in response.headers and "application/json" in response.headers["Content-Type"]:
             try:
