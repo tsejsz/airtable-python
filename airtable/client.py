@@ -81,15 +81,6 @@ class Client(object):
     def list_collaborators(self, baseId):
         return self.get(f"meta/bases/{baseId}")
 
-    def create_records(self, baseId, tableId, records):
-        """
-        'records' must be a list of dictionaries, each with one key: 'fields'.
-        'fields' key is a dictionary with all fields you want to fill as keys.
-        Field keys are case sensitive. 
-        """
-        data = {"records": records}
-        return self.post(f"{baseId}/{tableId}", data=json.dumps(data))
-
     def list_records(
         self,
         baseId,
@@ -115,6 +106,23 @@ class Client(object):
             params.update({"sort[0][direction]": sort_direction})
         return self.get(f"{baseId}/{tableId}?{urlencode(params)}")
 
+    def create_records(self, baseId, tableId, records):
+        """
+        'records' must be a list of dictionaries, each with one key: 'fields'.
+        'fields' key is a dictionary with all fields you want to fill as keys.
+        Field keys are case sensitive.
+        """
+        data = {"records": records}
+        return self.post(f"{baseId}/{tableId}", data=json.dumps(data))
+
+    def update_record(self, baseId, tableId, recordId, data):
+        """
+        data is a dictionary with the fields that you want to be updated.
+        Field keys are case sensitive
+        """
+        fields = {"fields": data}
+        return self.patch(f"{baseId}/{tableId}/{recordId}", data=json.dumps(fields))
+
     def get(self, endpoint, **kwargs):
         response = self.request("GET", endpoint, **kwargs)
         return self.parse(response)
@@ -125,6 +133,14 @@ class Client(object):
 
     def delete(self, endpoint, **kwargs):
         response = self.request("DELETE", endpoint, **kwargs)
+        return self.parse(response)
+
+    def put(self, endpoint, **kwargs):
+        response = self.request("PUT", endpoint, **kwargs)
+        return self.parse(response)
+
+    def patch(self, endpoint, **kwargs):
+        response = self.request("PATCH", endpoint, **kwargs)
         return self.parse(response)
 
     def request(self, method, endpoint, headers=None, auth_url=False, **kwargs):
@@ -143,7 +159,6 @@ class Client(object):
             return requests.request(method, self.URL + endpoint, headers=_headers, **kwargs)
 
     def parse(self, response):
-        print(response.request.url)
         status_code = response.status_code
         if "Content-Type" in response.headers and "application/json" in response.headers["Content-Type"]:
             try:

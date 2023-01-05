@@ -12,7 +12,7 @@ pip install airtable-python
 from airtable.client import Client
 client = Client(client_id, client_secret, redirect_uri, code_verifier)
 ```
-
+*Note: If you already have an access token, you can initiate Client without any parameters and directly set token with the access token you have as a dictionary {"access_token": token}*
 ### Get access_token
 To get the access token using Oauth2 follow the next steps.
 Check https://airtable.com/developers/web/api/oauth-reference for more info:
@@ -34,7 +34,7 @@ If your access token expired, you can get a new one using refresh_token:
 response = client.refresh_access_token(refresh_token)
 ```
 And then set access token again...  
-*Note: If you already have an access token, you can initiate Client without any parameters and directly set token with the access token you have as a dictionary {"access_token": token}*
+
 
 ### Get current user
 ```
@@ -75,6 +75,14 @@ records = [
     },
 ]
 records = client.create_records(baseId, tableId, records)
+```
+### Update Record
+```
+data = {
+    "Status": "Complete",
+    "Complete?": True
+}
+record = client.update_record(baseId, tableId, recordId, data)
 ```
 ### List Collaborators (needs enterprise scopes access)
 ```
