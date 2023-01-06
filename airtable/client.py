@@ -106,6 +106,14 @@ class Client(object):
             params.update({"sort[0][direction]": sort_direction})
         return self.get(f"{baseId}/{tableId}?{urlencode(params)}")
 
+    def list_records_gt_filter(self, baseId, tableId, field, filter_value):
+        params = {
+            "filterByFormula": "AND({" + f"{field}" + "}" + f">'{filter_value}')",
+            "sort[0][field]": field,
+            "sort[0][direction]": "asc",
+        }
+        return self.get(f"{baseId}/{tableId}?{urlencode(params)}")
+
     def create_records(self, baseId, tableId, records):
         """
         'records' must be a list of dictionaries, each with one key: 'fields'.

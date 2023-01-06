@@ -12,7 +12,7 @@ pip install airtable-python
 from airtable.client import Client
 client = Client(client_id, client_secret, redirect_uri, code_verifier)
 ```
-*Note: If you already have an access token, you can initiate Client without any parameters and directly set token with the access token you have as a dictionary {"access_token": token}*
+*Note: If you already have an access token, you can initiate Client without any parameters and directly set token with the access token you have as a dictionary client.set_token({"access_token": token})*
 ### Get access_token
 To get the access token using Oauth2 follow the next steps.
 Check https://airtable.com/developers/web/api/oauth-reference for more info:
