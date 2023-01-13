@@ -99,7 +99,7 @@ records = [
         },
     },
 ]
-updated_fields = client.update_record(baseId, tableId, records)
+updated_records = client.update_record(baseId, tableId, records)
 ```
 ### List Collaborators (needs enterprise scopes access)
 ```
