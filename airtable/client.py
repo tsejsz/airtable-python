@@ -131,6 +131,15 @@ class Client(object):
         fields = {"fields": data}
         return self.patch(f"{baseId}/{tableId}/{recordId}", data=json.dumps(fields))
 
+    def update_multiple_records(self, baseId, tableId, records):
+        """
+        Send a list of dictionaries with the following structure: \n
+        fields = dictionary with the fields you want to update,
+        id = record id
+        """
+        data = {"records": records}
+        return self.patch(f"{baseId}/{tableId}", data=json.dumps(data))
+
     def get(self, endpoint, **kwargs):
         response = self.request("GET", endpoint, **kwargs)
         return self.parse(response)

@@ -35,7 +35,6 @@ response = client.refresh_access_token(refresh_token)
 ```
 And then set access token again...  
 
-
 ### Get current user
 ```
 user = client.get_current_user()
@@ -83,6 +82,24 @@ data = {
     "Complete?": True
 }
 record = client.update_record(baseId, tableId, recordId, data)
+```
+### Update Multiple Records
+```
+records = [
+    {
+        "id": "recB4UscNECOHnT7y",
+        "fields": {
+            "Number": 10000,
+        },
+    },
+    {
+        "id": "recFkktx671jlvyj8",
+        "fields": {
+            "Number": 20000,
+        },
+    },
+]
+updated_fields = client.update_record(baseId, tableId, records)
 ```
 ### List Collaborators (needs enterprise scopes access)
 ```
