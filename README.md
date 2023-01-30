@@ -1,3 +1,4 @@
+![](https://img.shields.io/badge/version-0.1.0-success) ![](https://img.shields.io/badge/code-Python-4B8BBE?logo=python&logoColor=white)
 # airtable-python
 
 *airtable-python* is an API wrapper for Airtable, written in Python
