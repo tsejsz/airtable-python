@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "airtable-python"
-version = "0.1.1"
+version = "0.1.1a"
 description = "API wrapper for Airtable written in Python"
 authors = ["Juan Carlos Rios <juankrios15@gmail.com>"]
 license = "MIT"
