@@ -91,13 +91,14 @@ class Client(object):
         filter_value=None,
         sort_field=None,
         sort_direction=None,
+        offset=None
     ):
         """
         'filter_field' and 'sort_field' are case sensitive.
         'filter_value' must be exactly as shown in table.
         'sort_direction' options are 'asc' or 'desc'
         """
-        params = {"pageSize": pageSize if pageSize else "", "maxRecords": maxRecords if maxRecords else ""}
+        params = {"pageSize": pageSize if pageSize else "", "maxRecords": maxRecords if maxRecords else "", "offset": offset if offset else ""}
         if filter_field and filter_value:
             params.update({"filterByFormula": "AND({" + f"{filter_field}" + "}" + f"='{filter_value}')"})
         if sort_field:
